@@ -42,7 +42,7 @@ button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}
 #sendanswer{white-space:nowrap}
 #status,.status{color:var(--lime);font-weight:750;min-height:24px;line-height:1.5}
 #toast{margin-top:10px}
-.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;border:1px solid #536080;background:#252e4b;border-radius:999px;padding:5px 10px;color:#e1e7f6;white-space:nowrap}
+.rules-card{margin-top:20px;padding:17px 18px;border:1px solid #414e70;background:#10182b;border-radius:16px}.rules-card h3{margin:0 0 8px;color:var(--lime)}.rules-card ul{padding-left:20px;margin:8px 0 12px;color:var(--muted)}.rules-card li{margin:6px 0}.timerbox{margin:12px 0 18px}.timer-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:14px;margin-bottom:7px}.timer-meta strong{color:var(--lime);font-variant-numeric:tabular-nums}.timer-track{height:9px;background:#080d19;border:1px solid #3c4868;border-radius:999px;overflow:hidden}.timer-bar{height:100%;width:100%;background:linear-gradient(90deg,var(--lime),var(--violet));border-radius:999px;transition:width .2s linear}.progress-note{color:var(--muted);font-size:14px;font-weight:700;margin:8px 0 14px}.choice.selected{border-color:var(--pink);background:#49304b;box-shadow:0 0 0 2px #ff789455}.winner-banner{border:1px solid #d7ff6460;background:#d7ff6412;border-radius:16px;padding:16px;margin:12px 0;color:var(--lime);font-weight:900}.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;border:1px solid #536080;background:#252e4b;border-radius:999px;padding:5px 10px;color:#e1e7f6;white-space:nowrap}
 .topline{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid #35415f}
 .score{margin-left:auto;color:var(--lime);font-weight:900;font-variant-numeric:tabular-nums}
 #reveal h2{margin-top:20px;color:var(--lime)}
@@ -70,9 +70,195 @@ button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style></head><body><main><div class="brand">✦ FAKE FACT</div><h1>Truth is overrated.<br><span style="color:var(--purple)">Bluff brilliantly.</span></h1><p>Make up convincing answers, fool your friends, and spot the real fact. 2–8 players. No accounts needed.</p>
-<section id="home" class="panel"><h2>Ready to play?</h2><label class="small" for="nickname">Your nickname</label><div class="row" style="margin:8px 0 18px"><input id="nickname" maxlength="20" placeholder="e.g. Captain Chaos"></div><div class="row"><button id="create">Create a room</button><input id="roomcode" maxlength="4" placeholder="ROOM CODE" aria-label="Room code" style="text-transform:uppercase"><button id="join" class="secondary">Join room</button></div><p class="small">How to play: invent a fake fact, then vote for the answer you think is true. Get points for being right or fooling other players.</p></section>
-<section id="game" class="panel hidden"><div class="topline"><div><div class="small">ROOM CODE</div><div id="code" class="code"></div></div><div><span id="round" class="pill">Waiting room</span></div></div><p id="status" class="status"></p><div id="players"></div><div id="lobbyactions" class="row"><button id="start">Start game</button><button id="copy" class="secondary">Copy room code</button></div><div id="play" class="hidden"><div id="prompt" class="prompt"></div><div id="submitbox" class="hidden"><div class="row"><input id="answer" maxlength="120" placeholder="Write a believable fake answer"><button id="sendanswer">Submit bluff</button></div><p class="small">You have 30 seconds. Make it plausible!</p></div><div id="votebox" class="hidden"><p>Choose the answer you believe is the real one.</p><div id="choices"></div><p class="small">You cannot vote for your own bluff.</p></div><div id="reveal" class="hidden"></div><button id="next" class="hidden">Next round →</button><button id="rematch" class="hidden">Play again ↻</button></div></section><div id="toast" class="status" role="status"></div></main>
-<script src="/socket.io/socket.io.js"></script><script>
+<section id="home" class="panel"><h2>Ready to play?</h2><label class="small" for="nickname">Your nickname</label><div class="row" style="margin:8px 0 18px"><input id="nickname" maxlength="20" placeholder="e.g. Captain Chaos"></div><div class="row"><button id="create">Create a room</button><input id="roomcode" maxlength="4" placeholder="ROOM CODE" aria-label="Room code" style="text-transform:uppercase"><button id="join" class="secondary">Join room</button></div><div class="rules-card"><h3>Quick rules</h3><ul><li>Write a believable fake answer before the timer ends.</li><li>Vote for the answer you think is real. You cannot vote for your own bluff.</li><li><strong>+2 points</strong> for finding the real fact.</li><li><strong>+1 point</strong> for every player fooled by your bluff.</li></ul><p class="small">Five rounds · 2–8 players · no account needed</p></div></section>
+<section id="game" class="panel hidden"><div class="topline"><div><div class="small">ROOM CODE</div><div id="code" class="code"></div></div><div><span id="round" class="pill">Waiting room</span></div></div><p id="status" class="status"></p><div id="timerbox" class="timerbox hidden"><div class="timer-meta"><span id="timerlabel">Time remaining</span><strong id="timertext">30s</strong></div><div class="timer-track"><div id="timerbar" class="timer-bar"></div></div></div><div id="progress" class="progress-note"></div><div id="players"></div><div id="lobbyactions" class="row"><button id="start">Start game</button><button id="copy" class="secondary">Copy room code</button><button id="share" class="secondary">Share invite link</button></div><div id="play" class="hidden"><div id="prompt" class="prompt"></div><div id="submitbox" class="hidden"><div class="row"><input id="answer" maxlength="120" placeholder="Write a believable fake answer"><button id="sendanswer">Submit bluff</button></div><p class="small">You have 30 seconds. Make it plausible!</p></div><div id="votebox" class="hidden"><p>Choose the answer you believe is the real one.</p><div id="choices"></div><p class="small">You cannot vote for your own bluff.</p></div><div id="reveal" class="hidden"></div><button id="next" class="hidden">Next round →</button><button id="rematch" class="hidden">Play again ↻</button></div></section><div id="toast" class="status" role="status"></div></main>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const $ = id => document.getElementById(id);
+let roomCode = '', isHost = false, myId = getPlayerId(), myName = '', currentPhase = 'lobby';
+let submitted = false, voted = false, chosen = '', deadline = null, timerInterval = null;
+const qsRoom = new URLSearchParams(location.search).get('room');
+function getPlayerId() {
+  try {
+    let id = sessionStorage.getItem('fakefact.playerId');
+    if (!id) { id = (crypto.randomUUID ? crypto.randomUUID() : 'ff-' + Math.random().toString(36).slice(2) + Date.now().toString(36)); sessionStorage.setItem('fakefact.playerId', id); }
+    return id;
+  } catch { return 'ff-' + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+}
+function msg(t) { $('toast').textContent = t || ''; }
+function show(id, on = true) { $(id).classList.toggle('hidden', !on); }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function shareUrl() { const u = new URL(location.href); u.searchParams.set('room', roomCode); return u.toString(); }
+async function copyText(value, success) {
+  try { await navigator.clipboard.writeText(value); msg(success); }
+  catch { window.prompt('Copy this:', value); }
+}
+function enter(code, name) {
+  roomCode = code; myName = name;
+  try { sessionStorage.setItem('fakefact.roomCode', roomCode); sessionStorage.setItem('fakefact.name', myName); } catch {}
+  show('home', false); show('game'); $('code').textContent = roomCode;
+  const u = new URL(location.href); u.searchParams.set('room', roomCode); history.replaceState({}, '', u);
+  msg('');
+}
+function joinRoom(create) {
+  myName = $('nickname').value.trim();
+  if (!myName) { msg('Enter a nickname first.'); return; }
+  msg('');
+  if (create) {
+    socket.emit('room:create', { name: myName, playerId: myId }, r => {
+      if (!r || r.error) return msg(r && r.error || 'Could not create room. Try again.');
+      enter(r.code, myName);
+    });
+  } else {
+    roomCode = $('roomcode').value.trim().toUpperCase();
+    if (roomCode.length !== 4) return msg('Enter the 4-character room code.');
+    socket.emit('room:join', { code: roomCode, name: myName, playerId: myId }, r => {
+      if (!r || r.error) return msg(r && r.error || 'Could not join room. Try again.');
+      enter(r.code, myName);
+    });
+  }
+}
+function connectSavedRoom() {
+  let savedCode = '', savedName = '';
+  try { savedCode = sessionStorage.getItem('fakefact.roomCode') || ''; savedName = sessionStorage.getItem('fakefact.name') || ''; } catch {}
+  const code = (savedCode || qsRoom || '').trim().toUpperCase();
+  if (!code || !savedName) {
+    if (qsRoom) $('roomcode').value = qsRoom.toUpperCase();
+    return;
+  }
+  myName = savedName; roomCode = code;
+  socket.emit('room:reconnect', { code, playerId: myId }, r => {
+    if (!r || r.error) {
+      msg(r && r.error || 'Could not restore your room.');
+      if (r && r.error) {
+        try { sessionStorage.removeItem('fakefact.roomCode'); } catch {}
+        roomCode = '';
+      }
+      if (qsRoom) $('roomcode').value = qsRoom.toUpperCase();
+      return;
+    }
+    enter(code, savedName);
+    if (r.room) renderRoom(r.room);
+    msg('Welcome back — your game has been restored.');
+  });
+}
+function updateTimer() {
+  const box = $('timerbox');
+  if (!deadline || !['submit','vote'].includes(currentPhase)) { show('timerbox', false); return; }
+  show('timerbox', true);
+  const total = currentPhase === 'submit' ? 30000 : 20000;
+  const left = Math.max(0, deadline - Date.now());
+  $('timertext').textContent = Math.ceil(left / 1000) + 's';
+  $('timerlabel').textContent = currentPhase === 'submit' ? 'Time to bluff' : 'Time to vote';
+  $('timerbar').style.width = Math.max(0, Math.min(100, left / total * 100)) + '%';
+  $('timerbar').style.background = left < 6000 ? 'var(--pink)' : 'linear-gradient(90deg,var(--lime),var(--violet))';
+}
+function setDeadline(value) {
+  deadline = value || null;
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+  if (deadline) { updateTimer(); timerInterval = setInterval(updateTimer, 250); }
+  else show('timerbox', false);
+}
+function renderRoom(r) {
+  if (!r) return;
+  roomCode = r.code; myId = myId || socket.id; isHost = r.hostId === myId; currentPhase = r.phase;
+  $('code').textContent = r.code;
+  $('round').textContent = r.phase === 'lobby' ? 'Waiting room' : r.phase === 'finished' ? 'Game over' : 'Round ' + r.round + ' / ' + r.maxRounds;
+  $('players').innerHTML = '<h3>Players (' + r.players.length + '/8)</h3>' + r.players.map(p =>
+    '<div class="player">' + esc(p.name) + (p.id === r.hostId ? ' <span class="pill">HOST</span>' : '') +
+    (p.connected ? '' : ' <span class="pill">Reconnecting…</span>') +
+    '<span class="score">' + p.score + ' pts</span></div>').join('');
+  $('start').disabled = !isHost || r.players.filter(p => p.connected).length < 2;
+  show('lobbyactions', r.phase === 'lobby');
+  show('start', r.phase === 'lobby'); show('copy', r.phase === 'lobby'); show('share', r.phase === 'lobby');
+  show('play', r.phase !== 'lobby');
+  if (r.phase === 'lobby') { setDeadline(null); $('progress').textContent = 'Invite friends with the room code above.'; return; }
+  if (r.phase === 'submit') {
+    setDeadline(r.deadline);
+    $('progress').textContent = r.submissionCount + ' of ' + r.players.filter(p => p.connected).length + ' players submitted a bluff';
+    show('submitbox', !r.ownSubmitted); show('votebox', false); show('reveal', false); show('next', false); show('rematch', false);
+    $('prompt').textContent = r.prompt ? r.prompt.q : '';
+  } else if (r.phase === 'vote') {
+    setDeadline(r.deadline);
+    $('progress').textContent = r.voteCount + ' of ' + r.players.filter(p => p.connected).length + ' players voted';
+    show('submitbox', false); show('votebox', !r.ownVoted); show('reveal', false); show('next', false); show('rematch', false);
+    $('prompt').textContent = r.prompt ? r.prompt.q : '';
+    $('choices').innerHTML = (r.choices || []).map(c => '<button class="choice ' + (chosen === c.id ? 'selected' : '') + '" data-id="' + esc(c.id) + '" ' + (c.id === r.ownChoiceId ? 'disabled aria-label="Your own bluff"' : '') + '>' + esc(c.text) + '</button>').join('');
+    document.querySelectorAll('.choice').forEach(b => b.onclick = () => {
+      if (voted || b.disabled) return;
+      chosen = b.dataset.id;
+      document.querySelectorAll('.choice').forEach(x => x.classList.toggle('selected', x.dataset.id === chosen));
+      socket.emit('vote:submit', { choiceId: chosen });
+    });
+  } else if (r.phase === 'reveal') {
+    setDeadline(null); $('progress').textContent = 'Round ' + r.round + ' revealed';
+    show('submitbox', false); show('votebox', false); show('next', isHost); show('rematch', false);
+  } else if (r.phase === 'finished') {
+    setDeadline(null); $('progress').textContent = 'Final standings';
+    show('submitbox', false); show('votebox', false); show('next', false); show('rematch', isHost);
+    const top = r.results && r.results.length ? Math.max(...r.results.map(p => p.score)) : 0;
+    const winners = (r.results || []).filter(p => p.score === top);
+    $('reveal').innerHTML = '<div class="winner-banner">🏆 ' + (winners.length > 1 ? 'It’s a tie!' : 'Winner') + ' ' + winners.map(p => esc(p.name)).join(' &amp; ') + '</div><h2>Final leaderboard</h2>' +
+      (r.results || []).map((p,i) => '<div class="result">' + (p.score === top ? '🏆 ' : (i+1) + '. ') + esc(p.name) + '<span class="score">' + p.score + ' pts</span></div>').join('');
+    show('reveal', true);
+  }
+}
+$('create').onclick = () => joinRoom(true);
+$('join').onclick = () => joinRoom(false);
+$('start').onclick = () => socket.emit('game:start');
+$('copy').onclick = () => copyText(roomCode, 'Room code copied!');
+$('share').onclick = () => copyText(shareUrl(), 'Invite link copied!');
+$('sendanswer').onclick = () => {
+  const text = $('answer').value.trim();
+  if (!text) return msg('Write your fake answer first.');
+  socket.emit('answer:submit', { text });
+};
+$('next').onclick = () => socket.emit('game:next');
+$('rematch').onclick = () => socket.emit('game:rematch');
+socket.on('connect', () => {
+  myId = getPlayerId();
+  let savedCode = '', savedName = '';
+  try { savedCode = sessionStorage.getItem('fakefact.roomCode') || ''; savedName = sessionStorage.getItem('fakefact.name') || ''; } catch {}
+  if (savedCode && savedName) connectSavedRoom();
+  else if (qsRoom) $('roomcode').value = qsRoom.toUpperCase();
+});
+socket.on('notice', msg);
+socket.on('answer:submitted', () => { submitted = true; show('submitbox', false); msg('Bluff submitted! Waiting for everyone…'); });
+socket.on('vote:submitted', data => { voted = true; if (data && data.choiceId) chosen = data.choiceId; show('votebox', false); msg('Vote locked in!'); });
+socket.on('room:update', renderRoom);
+socket.on('round:prompt', d => {
+  submitted = false; voted = false; chosen = ''; $('answer').value = '';
+  $('prompt').textContent = d.q; $('status').textContent = 'Make up your answer before the timer runs out.';
+  setDeadline(d.deadline || Date.now() + d.seconds * 1000);
+  show('submitbox', true); show('votebox', false); show('reveal', false); show('next', false); show('rematch', false);
+});
+socket.on('vote:start', d => {
+  voted = false; chosen = ''; $('status').textContent = 'Voting is open — choose wisely!';
+  setDeadline(d.deadline || Date.now() + d.seconds * 1000); show('submitbox', false); show('votebox', true);
+});
+socket.on('round:reveal', d => {
+  setDeadline(null); $('status').textContent = 'The truth is revealed!';
+  const choices = d.choices || [];
+  $('reveal').innerHTML = '<h2>Real answer: ' + esc(d.answer) + '</h2><h3>Answers, authors & votes</h3>' +
+    choices.map(c => '<div class="result">' + esc(c.text) + (c.real ? ' <span class="pill">REAL FACT</span>' : '') +
+      (c.author ? '<div class="small">Bluff by ' + esc(c.author) + '</div>' : '') +
+      '<div class="small">Votes: ' + ((c.voters || []).length ? c.voters.map(esc).join(', ') : 'No votes') + '</div></div>').join('') +
+    '<h3>Points earned this round</h3>' + (d.results || []).map(p => '<div class="result">' + esc(p.name) +
+      '<span class="score">+' + (p.gained || 0) + ' · ' + p.score + ' total</span></div>').join('') +
+    '<h3>Leaderboard</h3>' + (d.results || []).map((p,i) => '<div class="result">' + (i+1) + '. ' + esc(p.name) +
+      '<span class="score">' + p.score + ' pts</span></div>').join('');
+  show('reveal', true); show('next', isHost); show('rematch', false);
+});
+(function initInvite() {
+  if (qsRoom) $('roomcode').value = qsRoom.toUpperCase();
+  try {
+    const savedName = sessionStorage.getItem('fakefact.name');
+    if (savedName) $('nickname').value = savedName;
+  } catch {}
+})();
+</script><script>
 const socket=io();let roomCode='',isHost=false,myId=socket.id,myName='',currentPhase='lobby',submitted=false,voted=false,chosen='';
 const $=id=>document.getElementById(id);function msg(t){$('toast').textContent=t||''}function call(event,data){socket.emit(event,data)}function show(id,on=true){$(id).classList.toggle('hidden',!on)}
 function joinRoom(create){myName=$('nickname').value.trim();if(!myName){msg('Enter a nickname first.');return}msg('');if(create)socket.emit('room:create',{name:myName},r=>{if(r.error)return msg(r.error);roomCode=r.code;isHost=true;enter()});else{roomCode=$('roomcode').value.trim().toUpperCase();if(roomCode.length!==4)return msg('Enter the 4-letter room code.');socket.emit('room:join',{code:roomCode,name:myName},r=>{if(r.error)return msg(r.error);isHost=false;enter()})}}
