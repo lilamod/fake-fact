@@ -163,7 +163,7 @@ function setDeadline(value) {
 }
 function renderRoom(r) {
   if (!r) return;
-  roomCode = r.code; myId = myId || socket.id; isHost = r.hostId === myId; currentPhase = r.phase;
+  roomCode = r.code; isHost = r.hostId === r.myId; currentPhase = r.phase;
   $('code').textContent = r.code;
   $('round').textContent = r.phase === 'lobby' ? 'Waiting room' : r.phase === 'finished' ? 'Game over' : 'Round ' + r.round + ' / ' + r.maxRounds;
   $('players').innerHTML = '<h3>Players (' + r.players.length + '/8)</h3>' + r.players.map(p =>
@@ -182,10 +182,12 @@ function renderRoom(r) {
     $('prompt').textContent = r.prompt ? r.prompt.q : '';
   } else if (r.phase === 'vote') {
     setDeadline(r.deadline);
-    $('progress').textContent = r.voteCount + ' of ' + r.players.filter(p => p.connected).length + ' players voted';
-    show('submitbox', false); show('votebox', !r.ownVoted); show('reveal', false); show('next', false); show('rematch', false);
+    $('progress').textContent = r.voteCount + ' of ' + r.players.filter(p => p.connected).length + ' players voted' + (r.ownVoted ? ' · Your vote is locked in' : '');
+    if (r.ownVoteChoiceId) chosen = r.ownVoteChoiceId;
+    voted = Boolean(r.ownVoted);
+    show('submitbox', false); show('votebox', true); show('reveal', false); show('next', false); show('rematch', false);
     $('prompt').textContent = r.prompt ? r.prompt.q : '';
-    $('choices').innerHTML = (r.choices || []).map(c => '<button class="choice ' + (chosen === c.id ? 'selected' : '') + '" data-id="' + esc(c.id) + '" ' + (c.id === r.ownChoiceId ? 'disabled aria-label="Your own bluff"' : '') + '>' + esc(c.text) + '</button>').join('');
+    $('choices').innerHTML = (r.choices || []).map(c => '<button class="choice ' + (chosen === c.id ? 'selected' : '') + '" data-id="' + esc(c.id) + '" ' + ((c.id === r.ownChoiceId) ? 'disabled aria-label="Your own bluff"' : (r.ownVoted ? 'disabled' : '')) + '>' + esc(c.text) + '</button>').join('');
     document.querySelectorAll('.choice').forEach(b => b.onclick = () => {
       if (voted || b.disabled) return;
       chosen = b.dataset.id;
@@ -226,7 +228,7 @@ socket.on('connect', () => {
 });
 socket.on('notice', msg);
 socket.on('answer:submitted', () => { submitted = true; show('submitbox', false); msg('Bluff submitted! Waiting for everyone…'); });
-socket.on('vote:submitted', data => { voted = true; if (data && data.choiceId) chosen = data.choiceId; show('votebox', false); msg('Vote locked in!'); });
+socket.on('vote:submitted', data => { voted = true; if (data && data.choiceId) chosen = data.choiceId; msg('Vote locked in! Your pick is highlighted.'); });
 socket.on('room:update', renderRoom);
 socket.on('round:prompt', d => {
   submitted = false; voted = false; chosen = ''; $('answer').value = '';
