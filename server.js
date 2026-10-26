@@ -36,11 +36,11 @@ const prompts = [
   { q: 'What is the only continent that lies in all four hemispheres?', a: 'Africa' },
   { q: 'Which sea creature has a W-shaped pupil?', a: 'Cuttlefish' },
   { q: 'What is the name of the phenomenon where a hot liquid can freeze faster than a colder one under some conditions?', a: 'Mpemba effect' },
-  { q: 'Which animal is known for producing a cube-shaped scat?', a: 'Wombat' },
+  { q: 'Which moon of Saturn has lakes and seas of liquid methane and ethane?', a: 'Titan' },
   { q: 'What is the name of the longest cranial nerve in the human body?', a: 'Vagus nerve' },
   { q: 'Which metal has the chemical symbol W?', a: 'Tungsten' },
   { q: 'What is the name of the line around Earth where the calendar date changes?', a: 'International Date Line' },
-  { q: 'Which animal has a transparent third eyelid called a nictitating membrane?', a: 'Many birds, including owls' },
+  { q: 'What is the name of the ring-shaped pattern of fungi sometimes seen in grass?', a: 'Fairy ring' },
   { q: 'What is the name of the first artificial object to reach interstellar space?', a: 'Voyager 1' },
   { q: 'Which natural material is made by mollusks to line the inside of some shells?', a: 'Nacre' },
   { q: 'What is the name of the process plants use to release water vapour through leaves?', a: 'Transpiration' },
@@ -73,13 +73,15 @@ function publicRoom(r, viewerId) {
   const players = [...r.players.values()];
   const ownSubmission = r.submissions.find(s => s.playerId === viewerId && !s.pass);
   const ownChoice = r.choices.find(c => c.playerId === viewerId && !c.real);
+  const viewer = r.players.get(viewerId);
   const hasVoted = Object.prototype.hasOwnProperty.call(r.votes, viewerId);
   return {
     code: r.code, phase: r.phase, round: r.round, maxRounds: 5,
-    hostId: r.hostId, players: players.map(p => ({ id: p.id, name: p.name, score: p.score, connected: p.connected })),
+    hostId: r.players.get(r.hostId)?.publicId || null, myId: viewer?.publicId || null, players: players.map(p => ({ id: p.publicId, name: p.name, score: p.score, connected: p.connected })),
     prompt: r.prompt ? { q: r.prompt.q } : null,
     choices: r.phase === 'vote' ? r.choices.map(c => ({ id: c.id, text: c.text })) : [],
     ownChoiceId: ownChoice ? ownChoice.id : null,
+    ownVoteChoiceId: r.votes[viewerId] || null,
     submitted: players.filter(p => r.submissions.some(s => s.playerId === p.id)).map(p => p.name),
     voted: players.filter(p => Object.prototype.hasOwnProperty.call(r.votes, p.id)).map(p => p.name),
     submissionCount: r.submissions.filter(s => !s.pass).length,
@@ -87,7 +89,7 @@ function publicRoom(r, viewerId) {
     ownSubmitted: Boolean(ownSubmission),
     ownVoted: hasVoted,
     deadline: r.deadline || null,
-    results: r.phase === 'finished' ? r.results : null
+    results: r.phase === 'finished' ? r.results.map(x => ({ id: r.players.get(x.id)?.publicId || null, name: x.name, score: x.score, winner: x.winner })) : null
   };
 }
 function sendRoom(r) {
@@ -177,7 +179,8 @@ function finishVote(r) {
     voters: Object.entries(r.votes).filter(([, id]) => id === c.id).map(([id]) => r.players.get(id)?.name || 'Disconnected player')
   }));
   const revealVotes = Object.fromEntries(Object.entries(r.votes).map(([id, choiceId]) => [r.players.get(id)?.name || 'Disconnected player', choiceId]));
-  io.to(r.code).emit('round:reveal', { answer: r.prompt.a, choices: revealChoices, votes: revealVotes, results: r.results, round: r.round, roundPoints: points });
+  const publicResults = r.results.map(x => ({ id: r.players.get(x.id)?.publicId || null, name: x.name, score: x.score, gained: x.gained }));
+  io.to(r.code).emit('round:reveal', { answer: r.prompt.a, choices: revealChoices, votes: revealVotes, results: publicResults, round: r.round });
   sendRoom(r);
   cancelTimer(r, 'advanceTimer');
   r.advanceTimer = setTimeout(() => {
@@ -214,7 +217,7 @@ io.on('connection', socket => {
     if (!validToken(playerId)) return respond(cb, { error: 'Refresh the page and try again.' });
     let c;
     do { c = makeCode(); } while (rooms.has(c));
-    const p = { id: playerId, name, score: 0, connected: true, socketId: socket.id, lastSeen: Date.now() };
+    const p = { id: playerId, publicId: randomId(), name, score: 0, connected: true, socketId: socket.id, lastSeen: Date.now() };
     const r = { code: c, hostId: p.id, players: new Map([[p.id, p]]), phase: 'lobby', round: 0,
       promptDeck: shuffle(prompts), promptIndex: 0, prompt: null, submissions: [], choices: [], votes: {},
       results: null, roundPoints: {}, deadline: null, timer: null, advanceTimer: null, cleanupTimer: null };
@@ -234,7 +237,7 @@ io.on('connection', socket => {
     if (r.phase !== 'lobby') return respond(cb, { error: 'This game has already started.' });
     if ([...r.players.values()].some(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase())) return respond(cb, { error: 'That nickname is already taken in this room.' });
     if (r.players.has(playerId)) return respond(cb, { error: 'This player token is already in use. Refresh and try again.' });
-    const p = { id: playerId, name, score: 0, connected: true, socketId: socket.id, lastSeen: Date.now() };
+    const p = { id: playerId, publicId: randomId(), name, score: 0, connected: true, socketId: socket.id, lastSeen: Date.now() };
     r.players.set(p.id, p);
     attachPlayer(socket, r, p);
     cancelTimer(r, 'cleanupTimer');
@@ -313,6 +316,7 @@ io.on('connection', socket => {
   });
   socket.on('disconnect', () => {
     if (socket.data.superseded) return;
+    try {
     const r = rooms.get(socket.data.room);
     if (!r) return;
     const p = r.players.get(socket.data.playerId);
@@ -326,6 +330,7 @@ io.on('connection', socket => {
       maybeAdvanceForProgress(r);
       if (connectedPlayers(r).length === 0) scheduleCleanup(r);
     }
+    } catch (error) { console.error('Socket disconnect handler error:', error); }
   });
 });
 
