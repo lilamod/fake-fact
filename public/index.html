@@ -1,6 +1,74 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#17152b"><title>Fake Fact — Bluff your friends</title><style>
-:root{color-scheme:dark;--bg:#17152b;--card:#24213e;--purple:#a78bfa;--pink:#fb7185;--text:#f8fafc;--muted:#b9b5d2;--line:#454064}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#30254e,var(--bg) 60%);font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:var(--text);min-height:100vh}main{width:min(760px,92vw);margin:0 auto;padding:30px 0 60px}.brand{font-size:14px;font-weight:800;letter-spacing:.15em;color:var(--purple)}h1{font-size:clamp(36px,7vw,58px);line-height:1.02;margin:16px 0}p{color:var(--muted);line-height:1.55}.panel{background:#24213eeF;border:1px solid var(--line);border-radius:22px;padding:24px;margin:18px 0;box-shadow:0 18px 55px #08061555}.row{display:flex;gap:10px;flex-wrap:wrap}input,button{font:inherit;border-radius:12px;padding:13px 15px;border:1px solid var(--line)}input{background:#17152b;color:white;flex:1;min-width:140px}button{cursor:pointer;background:var(--purple);color:#17152b;border:0;font-weight:800}button.secondary{background:#373154;color:white;border:1px solid var(--line)}button:disabled{opacity:.5;cursor:not-allowed}.hidden{display:none!important}.code{font-size:28px;letter-spacing:.2em;font-weight:900;color:var(--pink)}.prompt{font-size:clamp(22px,4vw,32px);font-weight:800;margin:18px 0}.small{font-size:13px;color:var(--muted)}.player,.choice,.result{padding:13px 15px;border:1px solid var(--line);border-radius:12px;margin:8px 0;background:#1d1a33}.choice{width:100%;text-align:left;background:#302a4d;color:white;border:1px solid #50466e}.choice:hover{border-color:var(--purple)}.choice.selected{border-color:var(--pink);background:#493049}.status{color:var(--pink);font-weight:700;min-height:24px}.pill{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:5px 9px;color:var(--muted)}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.score{float:right;color:var(--purple);font-weight:800}@media(max-width:520px){.panel{padding:18px}main{padding-top:20px}.row>*{width:100%}}
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1020"><title>Fake Fact — Bluff your friends</title><style>
+:root{color-scheme:dark;--bg:#0b1020;--surface:#141b30;--surface-raised:#1b2440;--lime:#d7ff64;--violet:#9c8cff;--pink:#ff7894;--text:#f8f7f2;--muted:#c0c8dc;--line:#35415f;--focus:#d7ff64}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 50% -15%,#30365d 0%,#11172b 42%,var(--bg) 78%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh;font-size:16px;line-height:1.5}
+main{width:min(760px,100% - 32px);margin:0 auto;padding:28px 0 56px}
+.brand{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:900;letter-spacing:.2em;color:var(--lime);border:1px solid #d7ff6440;background:#d7ff6410;border-radius:999px;padding:8px 12px}
+h1{font-size:clamp(38px,7vw,64px);letter-spacing:-.055em;line-height:.99;margin:22px 0 14px;font-weight:950}
+h1 span{color:var(--lime)!important}
+h2{font-size:clamp(24px,5vw,32px);letter-spacing:-.035em;line-height:1.12;margin:0 0 18px}
+h3{font-size:17px;margin:20px 0 10px}
+main>p{max-width:58ch;color:var(--muted);font-size:16px;line-height:1.65;margin:0 0 25px}
+p{color:var(--muted);line-height:1.65}
+.panel{background:linear-gradient(155deg,#19213aF5,#11182bF8);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,30px);margin:18px 0;box-shadow:0 22px 70px #03061070;position:relative;overflow:hidden}
+.panel:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--lime),var(--violet),var(--pink));opacity:.9}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
+label{display:block;margin-bottom:5px}
+input,button{font:inherit;min-height:48px;border-radius:14px;padding:12px 15px;border:1px solid var(--line);transition:border-color .16s ease,background .16s ease,transform .16s ease,box-shadow .16s ease}
+input{background:#0b1121;color:var(--text);flex:1;min-width:140px;outline:none}
+input::placeholder{color:#8f9bb5}
+input:focus-visible{border-color:var(--lime);box-shadow:0 0 0 3px #d7ff6425}
+button{cursor:pointer;background:var(--lime);color:#111827;border:1px solid transparent;font-weight:900;box-shadow:0 5px 0 #8fb82b;letter-spacing:-.01em}
+button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.04)}
+button:active:not(:disabled){transform:translateY(1px);box-shadow:0 2px 0 #8fb82b}
+button:focus-visible{outline:3px solid var(--violet);outline-offset:3px}
+button.secondary{background:#262c4b;color:var(--text);border:1px solid #596286;box-shadow:0 4px 0 #10162a}
+button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}
+.hidden{display:none!important}
+.code{font-size:clamp(30px,7vw,42px);letter-spacing:.22em;font-weight:950;color:var(--lime);line-height:1.15;text-shadow:0 0 26px #d7ff6420}
+.prompt{font-size:clamp(27px,6vw,42px);font-weight:900;letter-spacing:-.035em;line-height:1.12;margin:22px 0 24px;color:var(--text);max-width:19ch}
+.small{font-size:14px;color:var(--muted);line-height:1.5}
+.player,.choice,.result{padding:15px 16px;border:1px solid var(--line);border-radius:15px;margin:9px 0;background:#0f172a;color:var(--text);line-height:1.45;overflow-wrap:anywhere}
+.player{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#19213a}
+.choice{display:block;width:100%;min-height:58px;text-align:left;background:#202943;color:var(--text);border:1px solid #414e70;box-shadow:none;font-weight:700;font-size:16px;padding:16px 18px;white-space:normal}
+.choice:hover:not(:disabled){background:#2a3555;border-color:var(--lime);box-shadow:0 0 0 1px #d7ff6440;transform:translateY(-1px)}
+.choice.selected{border-color:var(--pink);background:#3a2944}
+#choices{display:grid;grid-template-columns:1fr;gap:8px;margin:16px 0}
+#votebox>p:first-child{font-weight:750;color:var(--text);font-size:17px}
+#submitbox .row{align-items:stretch}
+#answer{min-width:0}
+#sendanswer{white-space:nowrap}
+#status,.status{color:var(--lime);font-weight:750;min-height:24px;line-height:1.5}
+#toast{margin-top:10px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;border:1px solid #536080;background:#252e4b;border-radius:999px;padding:5px 10px;color:#e1e7f6;white-space:nowrap}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid #35415f}
+.score{margin-left:auto;color:var(--lime);font-weight:900;font-variant-numeric:tabular-nums}
+#reveal h2{margin-top:20px;color:var(--lime)}
+#reveal h3{margin-top:26px}
+.result{background:#18213a}
+.result .pill{margin-left:5px;color:var(--lime);border-color:#718743;background:#28371f}
+#next,#rematch{margin-top:18px;min-width:160px}
+#players .player:first-of-type{margin-top:10px}
+@media(min-width:600px){main{padding-top:38px}#home .row:first-of-type input{max-width:100%}#choices{gap:10px}.panel{margin:22px 0}}
+@media(max-width:520px){
+ main{width:calc(100% - 24px);padding:18px 0 36px}
+ h1{font-size:clamp(37px,11vw,50px);margin-top:19px}
+ main>p{font-size:15px;margin-bottom:20px}
+ .panel{padding:18px 15px;border-radius:19px;margin:14px 0}
+ .row{gap:9px}
+ .row>*{width:100%;min-width:0}
+ input,button{min-height:50px;font-size:16px}
+ .code{font-size:31px}
+ .prompt{font-size:clamp(27px,8vw,35px);margin:22px 0}
+ .choice{font-size:16px;min-height:58px;padding:15px}
+ .player,.result{padding:13px}
+ .small{font-size:14px}
+ #sendanswer{white-space:normal}
+ .topline{align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style></head><body><main><div class="brand">✦ FAKE FACT</div><h1>Truth is overrated.<br><span style="color:var(--purple)">Bluff brilliantly.</span></h1><p>Make up convincing answers, fool your friends, and spot the real fact. 2–8 players. No accounts needed.</p>
 <section id="home" class="panel"><h2>Ready to play?</h2><label class="small" for="nickname">Your nickname</label><div class="row" style="margin:8px 0 18px"><input id="nickname" maxlength="20" placeholder="e.g. Captain Chaos"></div><div class="row"><button id="create">Create a room</button><input id="roomcode" maxlength="4" placeholder="ROOM CODE" aria-label="Room code" style="text-transform:uppercase"><button id="join" class="secondary">Join room</button></div><p class="small">How to play: invent a fake fact, then vote for the answer you think is true. Get points for being right or fooling other players.</p></section>
 <section id="game" class="panel hidden"><div class="topline"><div><div class="small">ROOM CODE</div><div id="code" class="code"></div></div><div><span id="round" class="pill">Waiting room</span></div></div><p id="status" class="status"></p><div id="players"></div><div id="lobbyactions" class="row"><button id="start">Start game</button><button id="copy" class="secondary">Copy room code</button></div><div id="play" class="hidden"><div id="prompt" class="prompt"></div><div id="submitbox" class="hidden"><div class="row"><input id="answer" maxlength="120" placeholder="Write a believable fake answer"><button id="sendanswer">Submit bluff</button></div><p class="small">You have 30 seconds. Make it plausible!</p></div><div id="votebox" class="hidden"><p>Choose the answer you believe is the real one.</p><div id="choices"></div><p class="small">You cannot vote for your own bluff.</p></div><div id="reveal" class="hidden"></div><button id="next" class="hidden">Next round →</button><button id="rematch" class="hidden">Play again ↻</button></div></section><div id="toast" class="status" role="status"></div></main>
