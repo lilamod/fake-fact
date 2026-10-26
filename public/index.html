@@ -8,7 +8,7 @@
 const socket=io();let roomCode='',isHost=false,myId=socket.id,myName='',currentPhase='lobby',submitted=false,voted=false,chosen='';
 const $=id=>document.getElementById(id);function msg(t){$('toast').textContent=t||''}function call(event,data){socket.emit(event,data)}function show(id,on=true){$(id).classList.toggle('hidden',!on)}
 function joinRoom(create){myName=$('nickname').value.trim();if(!myName){msg('Enter a nickname first.');return}msg('');if(create)socket.emit('room:create',{name:myName},r=>{if(r.error)return msg(r.error);roomCode=r.code;isHost=true;enter()});else{roomCode=$('roomcode').value.trim().toUpperCase();if(roomCode.length!==4)return msg('Enter the 4-letter room code.');socket.emit('room:join',{code:roomCode,name:myName},r=>{if(r.error)return msg(r.error);isHost=false;enter()})}}
-function enter(){show('home',false);show('game');$('code').textContent=roomCode;$('status').textContent='Share this code with friends.';socket.emit('room:reconnect',{code:roomCode,name:myName},()=>{});}
+function enter(){show('home',false);show('game');$('code').textContent=roomCode;$('status').textContent='Share this code with friends.';}
 $('create').onclick=()=>joinRoom(true);$('join').onclick=()=>joinRoom(false);$('start').onclick=()=>call('game:start');$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(roomCode);msg('Room code copied!')}catch{msg('Room code: '+roomCode)}};
 $('sendanswer').onclick=()=>{const text=$('answer').value.trim();if(!text)return msg('Write your fake answer first.');call('answer:submit',{text})};
 $('next').onclick=()=>call('game:next');$('rematch').onclick=()=>call('game:rematch');
