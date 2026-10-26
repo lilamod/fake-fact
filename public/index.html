@@ -177,12 +177,16 @@ function renderRoom(r) {
   if (r.phase === 'lobby') { setDeadline(null); $('progress').textContent = 'Invite friends with the room code above.'; return; }
   if (r.phase === 'submit') {
     setDeadline(r.deadline);
-    $('progress').textContent = r.submissionCount + ' of ' + r.players.filter(p => p.connected).length + ' players submitted a bluff';
+    const activeSubmitters = r.players.filter(p => p.connected).length;
+    const waitingToSubmit = r.players.filter(p => p.connected && !(r.submitted || []).includes(p.name)).map(p => p.name);
+    $('progress').textContent = r.submissionCount + ' of ' + activeSubmitters + ' players submitted a bluff' + (waitingToSubmit.length ? ' · Waiting on: ' + waitingToSubmit.join(', ') : '');
     show('submitbox', !r.ownSubmitted); show('votebox', false); show('reveal', false); show('next', false); show('rematch', false);
     $('prompt').textContent = r.prompt ? r.prompt.q : '';
   } else if (r.phase === 'vote') {
     setDeadline(r.deadline);
-    $('progress').textContent = r.voteCount + ' of ' + r.players.filter(p => p.connected).length + ' players voted' + (r.ownVoted ? ' · Your vote is locked in' : '');
+    const activeVoters = r.players.filter(p => p.connected).length;
+    const waitingToVote = r.players.filter(p => p.connected && !(r.voted || []).includes(p.name)).map(p => p.name);
+    $('progress').textContent = r.voteCount + ' of ' + activeVoters + ' players voted' + (waitingToVote.length ? ' · Waiting on: ' + waitingToVote.join(', ') : '') + (r.ownVoted ? ' · Your vote is locked in' : '');
     if (r.ownVoteChoiceId) chosen = r.ownVoteChoiceId;
     voted = Boolean(r.ownVoted);
     show('submitbox', false); show('votebox', true); show('reveal', false); show('next', false); show('rematch', false);
