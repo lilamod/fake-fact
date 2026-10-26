@@ -306,7 +306,7 @@ io.on('connection', socket => {
   safeHandler(socket, 'game:rematch', () => {
     const r = rooms.get(socket.data.room);
     if (!r || r.hostId !== socket.data.playerId || r.phase !== 'finished') return sendNotice(socket, 'Only the host can start a rematch.');
-    if (r.promptIndex >= r.promptDeck.length) return sendNotice(socket, 'This room has used its full prompt deck. Create a new room for fresh questions.');
+    if (r.promptIndex + 5 > r.promptDeck.length) return sendNotice(socket, 'This room does not have five unused prompts left. Create a new room for a fresh full game.');
     cancelTimer(r, 'advanceTimer');
     r.round = 0;
     for (const p of r.players.values()) p.score = 0;
