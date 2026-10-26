@@ -106,7 +106,7 @@ io.on('connection',socket=>{
   const p=r.players.get(socket.id);text=String(text||'').trim().slice(0,120);
   if(!p||!p.connected||!text)return notice(socket,'Enter an answer first.');
   if(r.submissions.some(s=>s.playerId===socket.id))return notice(socket,'You already submitted this round.');
-  r.submissions.push({id:socket.id+'-'+Date.now(),text,playerId:socket.id});socket.emit('answer:submitted');sendRoom(r);
+  r.submissions.push({id:Math.random().toString(36).slice(2,12),text,playerId:socket.id});socket.emit('answer:submitted');sendRoom(r);
   if([...r.players.values()].filter(p=>p.connected).every(p=>r.submissions.some(s=>s.playerId===p.id)))startVote(r);
  });
  socket.on('vote:submit',({choiceId})=>{
